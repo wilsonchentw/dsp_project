@@ -1,0 +1,17 @@
+make clean -C caffe-master -j 24 && \
+make all -C caffe-master -j 24 && \
+make test -C caffe-master -j 24 && \
+make runtest -C caffe-master && \
+make pycaffe -C caffe-master && \
+make matcaffe -C caffe-master && \
+make distribute -C caffe-master && \
+cd dsp_proj
+rm 50data_{t*,mean*} -rf && \
+./split_dataset.py 50data 50data_train 50data_test && \
+./to_caffe_dataset.py 50data_train 50data_train.txt && \
+./to_caffe_dataset.py 50data_test 50data_test.txt && \
+caffe-master/build/tools/convert_imageset --resize_height=256 --resize_width=256 --shuffle 50data_train/ 50data_train.txt 50data_train_lmdb && \
+caffe-master/build/tools/convert_imageset --resize_height=256 --resize_width=256 --shuffle 50data_test/ 50data_test.txt 50data_test_lmdb && \
+caffe-master/build/tools/compute_image_mean 50data_train_lmdb/ 50data_mean.binaryproto lmdb && \
+caffe-master/build/tools/caffe train --solver=solver.prototxt
+
