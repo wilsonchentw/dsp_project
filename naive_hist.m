@@ -16,7 +16,7 @@ sumImg = zeros(80, 80, 3);
 sqrsumImg = zeros(80, 80, 3);
 for idx=1:size(data{1}, 1)
     if (mod(idx, 100) == 0) 
-        idx 
+        fprintf(1, '#%d file\n', idx);
     end
     img = imresize(imread(fullfile(root, data{1}{idx})), [h w]);
     sumImg = sumImg + double(img);
