@@ -11,7 +11,7 @@ data = textscan(fd, '%s %d');
 fclose(fd);
 
 % Training phase
-trainFeatures = [];
+trainFeatures = [zeros(size(data{1}, 1), w*h*c)];
 sumImg = zeros(80, 80, 3);
 sqrsumImg = zeros(80, 80, 3);
 for idx=1:size(data{1}, 1)
@@ -21,7 +21,8 @@ for idx=1:size(data{1}, 1)
     img = imresize(imread(fullfile(root, data{1}{idx})), [h w]);
     sumImg = sumImg + double(img);
     sqrsumImg = sqrsumImg + double(img.^2);
-    trainFeatures = [trainFeatures ; double(reshape(img, 1, []))];
+    %trainFeatures = [trainFeatures ; double(reshape(img, 1, []))];
+    trainFeatures(idx,:) = double(reshape(img, 1, []));
 end
 meanVector = reshape(sumImg/size(data{1}, 1), 1, []);
 stdVector = reshape(sqrsumImg/size(data{1}, 1), 1, [])-meanVector.^2;
