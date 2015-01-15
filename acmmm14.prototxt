@@ -1,0 +1,137 @@
+name: "acmmm14"
+layers { 
+    top: "data"
+    top: "label"
+    name: "data"
+    include: { phase: TRAIN }
+    type: DATA
+    data_param { 
+        source: "50data_train_lmdb"
+        batch_size: 512
+        backend: LMDB
+    }
+    transform_param {
+        mirror: true
+        crop_size: 64
+        mean_file: "50data_mean.binaryproto"
+    }
+}
+layers {
+    top: "data"
+    top: "label"
+    name: "data"
+    include: { phase: TEST }
+    type: DATA
+    data_param {
+        source: "50data_test_lmdb"
+        batch_size: 512
+        backend: LMDB
+    }
+    transform_param {
+        mirror: false
+        crop_size: 64
+        mean_file: "50data_mean.binaryproto"
+    }
+}
+
+layers { 
+    bottom: "data"
+    top: "conv1"
+    name: "conv1"
+    type: CONVOLUTION
+    convolution_param {
+        num_output: 32
+        kernel_size: 5
+        weight_filler {
+            type: "gaussian"
+            std: 0.01
+        }
+        bias_filler {
+            type: "constant"
+            value: 0
+        }
+    }
+}
+layers {
+    bottom: "conv1"
+    top: "pool1"
+    name: "pool1"
+    type: POOLING
+    pooling_param {
+        pool: MAX
+        kernel_size: 3
+        stride: 2
+    }
+}
+layers { 
+    bottom: "pool1"
+    top: "norm1"
+    name: "norm1" 
+    type: LRN
+    lrn_param {
+        local_size: 5
+        alpha: 0.0001
+        beta: 0.75
+    }
+}
+layers { 
+    bottom: "norm1"
+    top: "conv2"
+    name: "conv2"
+    type: CONVOLUTION
+    convolution_param {
+        num_output: 32
+        kernel_size: 5
+        weight_filler {
+            type: "gaussian"
+            std: 0.01
+        }
+        bias_filler {
+            type: "constant"
+            value: 0
+        }
+    }
+}
+layers {
+    bottom: "conv2"
+    top: "pool2"
+    name: "pool2"
+    type: POOLING
+    pooling_param {
+        pool: MAX
+        kernel_size: 3
+        stride: 2
+    }
+}
+layers {
+    bottom: "pool2"
+    top: "fc"
+    name: "fc"
+    type: INNER_PRODUCT
+    inner_product_param {
+        num_output: 50
+        weight_filler {
+            type: "gaussian"
+            std: 0.01
+        }
+        bias_filler {
+            type: "constant"
+            value: 0
+        }
+    }   
+}
+layers {
+    bottom: "fc"
+    bottom: "label"
+    top: "accuracy"
+    name: "accuracy"
+    type: ACCURACY
+    include: { phase: TEST }
+}
+layers { 
+    bottom: "fc"
+    bottom: "label"
+    top: "loss"
+    name: "loss"
+    type: SOFTMAX_LOSS
+}
