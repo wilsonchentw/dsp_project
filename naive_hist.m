@@ -14,7 +14,7 @@ fclose(fd);
 trainFeatures = [];
 sumImg = zeros(80, 80, 3);
 sqrsumImg = zeros(80, 80, 3);
-for idx=1:size(data{1}, 1)/100
+for idx=1:size(data{1}, 1)
     img = imresize(imread(fullfile(root, data{1}{idx})), [h w]);
     sumImg = sumImg + double(img);
     sqrsumImg = sqrsumImg + double(img.^2);
@@ -30,5 +30,5 @@ trainLabel = double(data{2}(1:size(trainFeatures, 1)));
 model = train(trainLabel, trainFeatures);
 [predict_train, train_acc, ans] = predict(trainLabel, trainFeatures, model);
 [predict_test, train_acc, ans] = predict(trainLabel, trainFeatures, model);
-%save(modelpath, 'model');
+save(modelpath, 'model');
 end
