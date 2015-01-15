@@ -11,7 +11,7 @@ w = 80;
 c = 3;
 
 imgArray = [];
-for idx=1:size(data{1}, 1)/100
+for idx=1:size(data{1}, 1)
     img = imread(fullfile(root, data{1}{idx}));
     imgArray(:,:,:,idx) = imresize(img, [h w]);
 end
