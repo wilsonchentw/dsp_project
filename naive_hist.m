@@ -1,8 +1,8 @@
-clear; clc;
-addpath('D:\liblinear-1.96\matlab');
+function naive_hist(root, filelist, svmpath, modelpath)
 
-root = '50data';
-fd = fopen('50data_test.txt');
+addpath(svmpath);
+
+fd = fopen(filelist);
 data = textscan(fd, '%s %d');
 fclose(fd);
 
@@ -11,7 +11,7 @@ w = 80;
 c = 3;
 
 imgArray = [];
-for idx=1:size(data{1}, 1)
+for idx=1:size(data{1}, 1)/100
     img = imread(fullfile(root, data{1}{idx}));
     imgArray(:,:,:,idx) = imresize(img, [h w]);
 end
@@ -27,3 +27,4 @@ label = double(data{2}(1:size(features, 1)));
 
 model = train(label, features);
 [predict_label, acc, ans] = predict(label, features, model);
+save(modelpath, 'model');
