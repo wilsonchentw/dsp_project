@@ -1,30 +1,34 @@
-function naive_hist(root, filelist, svmpath, modelpath)
+function naive_hist(root, trainlist, testlist, svmpath, modelpath)
 
 addpath(svmpath);
-
-fd = fopen(filelist);
-data = textscan(fd, '%s %d');
-fclose(fd);
 
 h = 80;
 w = 80;
 c = 3;
 
-imgArray = [];
-for idx=1:size(data{1}, 1)
-    img = imread(fullfile(root, data{1}{idx}));
-    imgArray(:,:,:,idx) = imresize(img, [h w]);
-end
-meanImg = mean(imgArray, 4);
-stdImg = std(imgArray, 1, 4);
+fd = fopen(trainlist);
+data = textscan(fd, '%s %d');
+fclose(fd);
 
-features = [];
-for idx=1:size(imgArray, 4)
-    img = (imgArray(:,:,:,idx)-meanImg)./stdImg;
-    features = [features ; sparse(reshape(img, 1, []))];
+% Training phase
+trainFeatures = [];
+sumImg = zeros(80, 80, 3);
+sqrsumImg = zeros(80, 80, 3);
+for idx=1:size(data{1}, 1)/100
+    img = imresize(imread(fullfile(root, data{1}{idx})), [h w]);
+    sumImg = sumImg + double(img);
+    sqrsumImg = sqrsumImg + double(img.^2);
+    trainFeatures = [trainFeatures ; double(reshape(img, 1, []))];
 end
-label = double(data{2}(1:size(features, 1)));
+meanVector = reshape(sumImg/size(data{1}, 1), 1, []);
+stdVector = reshape(sqrsumImg/size(data{1}, 1), 1, [])-meanVector.^2;
+trainFeatures = trainFeatures-repmat(meanVector, size(trainFeatures, 1), 1);
+trainFeatures = trainFeatures./repmat(stdVector, size(trainFeatures, 1), 1);
+trainFeatures = sparse(trainFeatures);
+trainLabel = double(data{2}(1:size(trainFeatures, 1)));
 
-model = train(label, features);
-[predict_label, acc, ans] = predict(label, features, model);
-save(modelpath, 'model');
+model = train(trainLabel, trainFeatures);
+[predict_train, train_acc, ans] = predict(trainLabel, trainFeatures, model);
+[predict_test, train_acc, ans] = predict(trainLabel, trainFeatures, model);
+%save(modelpath, 'model');
+end
