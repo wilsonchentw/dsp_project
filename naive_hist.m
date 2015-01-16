@@ -30,7 +30,7 @@ features = features./repmat(stdVector, size(features, 1), 1);
 features = sparse(features);
 label = double(data{2}(1:size(features, 1)));
 model = train(label, features);
-
+[predict_test, train_acc, ans] = predict(label, features, model);
 
 % Testing phase
 fd = fopen(testlist);
